@@ -13,3 +13,4 @@ users = ['John', 'David', 'Kate', 'Alex']
 
 for user in users:
     print(f'Привет {user}')
+
