@@ -1,7 +1,6 @@
 """Серверное приложение"""
 import asyncio
 from asyncio import transports
-from typing import Optional
 
 
 class ClientProtocol(asyncio.Protocol):
@@ -25,6 +24,16 @@ class ClientProtocol(asyncio.Protocol):
                 self.transport.write(
                     f"Привет {self.login}!".encode() # Закодировать строку
                 )
+        else:
+            self.send_message(decoded)
+
+    def send_message(self, message):
+        format_string = f"<{self.login}> {message}"
+        encoded = format_string.encode()
+
+        for client in self.server.clients:
+            if client.login != self.login:
+                client.transport.write(encoded)
 
     def connection_made(self, transport: transports.Transport):
         self.transport = transport
@@ -60,4 +69,7 @@ class Server:
 
 
 process = Server()
-asyncio.run(process.start())
+try:
+    asyncio.run(process.start())
+except KeyboardInterrupt:
+    print("Сервер остановлен вручную")
