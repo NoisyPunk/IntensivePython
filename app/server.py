@@ -18,11 +18,13 @@ class ClientProtocol(asyncio.Protocol):
 
     def connection_made(self, transport: transports.Transport):
         self.transport = transport
+        self.server.clients.append(self)
         print("Соединение установлено")
 
 
     def connection_lost(self, exception):
-    print("Соединение разорвано")
+        self.server.clients.remove(self)
+        print("Соединение разорвано")
 
 
 class Server:
@@ -34,7 +36,7 @@ class Server:
     def create_protocol(self):
         return ClientProtocol(self)
 
-    def start(self):
+    async def start(self):
         loop = asyncio.get_running_loop()
 
         coroutine = await loop.create_server(
