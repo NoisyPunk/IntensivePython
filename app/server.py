@@ -11,16 +11,25 @@ class ClientProtocol(asyncio.Protocol):
 
     def __int__(self, server: 'Server'):
         self.server = server
+        self.login = None
 
     def data_received(self, data: bytes):
-        print(data)
+        decoded = data.decode()
 
+        print(decoded)
+
+        if self.login is None:
+            # login:User
+            if decoded.startswith("login:"):
+                self.login = decoded.replace("login:", "").replace("\r\n", "")
+                self.transport.write(
+                    f"Привет {self.login}!".encode() # Закодировать строку
+                )
 
     def connection_made(self, transport: transports.Transport):
         self.transport = transport
         self.server.clients.append(self)
         print("Соединение установлено")
-
 
     def connection_lost(self, exception):
         self.server.clients.remove(self)
