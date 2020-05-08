@@ -4,6 +4,7 @@ from PySide2.QtWidgets import QMainWindow, QApplication
 from app.design import Ui_MainWindow
 import asyncio
 from asyncio import transports
+from asyncqt import QEventLoop
 
 
 class ClientProtocol(asyncio.Protocol):
@@ -44,9 +45,10 @@ class Chat(QMainWindow, Ui_MainWindow):
         return self.protocol
 
     async def start(self):
+        self.show()
         loop = asyncio.get_running_loop()
 
-        coroutine = await loop.create_connection(
+        coroutine = loop.create_connection(
             self.create_protocol,
             "127.0.0.1",
             8888
@@ -56,5 +58,13 @@ class Chat(QMainWindow, Ui_MainWindow):
 
 
 app = QApplication()
+loop = QEventLoop(app)
+
+asyncio.set_event_loop(loop)
+
 window = Chat()
+
+loop.create_task(window.start())
+loop.run_forever()
+
 
